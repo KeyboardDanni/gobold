@@ -2,6 +2,10 @@
 
 ## Related to this project
 
+### Assets
+
+- [ ] Remove the need to have a copy of Aseprite to load and run the project.
+
 ### Movement
 
 - [ ] Moving platforms
