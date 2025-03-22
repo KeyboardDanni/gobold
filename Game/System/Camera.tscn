@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddwqlfjiyaaeb"]
+
+[ext_resource type="Script" uid="uid://ddkmejjnnvex7" path="res://Game/System/Scripts/Camera.gd" id="1_cyn0o"]
+
+[node name="Camera2D" type="Camera2D"]
+process_priority = 100
+process_physics_priority = 100
+process_callback = 0
+script = ExtResource("1_cyn0o")

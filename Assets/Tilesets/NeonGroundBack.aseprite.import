@@ -1,0 +1,16 @@
+[remap]
+
+importer="aseprite_wizard.plugin.static-texture"
+type="PortableCompressedTexture2D"
+uid="uid://dc437owd58vjr"
+path="res://.godot/imported/NeonGroundBack.aseprite-245a175b3bc9996a0cb8e6da28de2bd3.res"
+
+[deps]
+
+source_file="res://Assets/Tilesets/NeonGroundBack.aseprite"
+dest_files=["res://.godot/imported/NeonGroundBack.aseprite-245a175b3bc9996a0cb8e6da28de2bd3.res"]
+
+[params]
+
+layer/exclude_layers_pattern=""
+layer/only_visible_layers=true
