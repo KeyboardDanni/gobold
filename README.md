@@ -1,4 +1,4 @@
-# Gobold, a pixel platformer example and framework for Godot
+﻿# Gobold, a pixel platformer example and framework for Godot
 
 Gobold is an example project that demonstrates how I approach making "pixel-perfect" games in Godot. Many new developers looking to make pixel-style games don't know where to start, and often run into problems such as pixel jitter and shimmering. Thankfully, there are several techniques (many of which are built into Godot) that can address these issues.
 
@@ -7,6 +7,12 @@ Gobold also intends to be a framework for useful game functionality such as game
 This project's motto is "frame-perfect detail, down to the pixel".
 
 ![Screenshot of Gobold](https://raw.githubusercontent.com/KeyboardDanni/gobold/main/screenshot.png)
+
+## Prerequisites
+
+- Godot 4.4 stable (might change in the future)
+- A copy of Aseprite (for graphics import)
+- Aseprite Wizard configured to point to the Aseprite binary in **Editor Settings -> Aseprite -> General** (may require Advanced Settings toggle).
 
 ## Who's that critter?
 
