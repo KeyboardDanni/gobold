@@ -27,13 +27,14 @@ enum WalkDirection {
 @export var max_velocity: Vector2 = Vector2(960.0, 960.0);
 
 @export_category("Movement Tweaks")
+@export var jump_input_buffer: float = 0.15;
 @export var coyote_time: float = 0.2;
 @export var floor_angle_max: float = AngleUtil.ANGLE_60_DEGREES;
 @export var floor_snap_distance: float = 12.0;
 
 var input_walk: WalkDirection = WalkDirection.NEUTRAL;
 var input_jump: bool = false;
-var _input_jump_held: bool = false;
+var _input_jump_held: float = 0.0;
 var on_floor: bool = false;
 var on_floor_raw: bool = false;
 var floor_vector = Vector2.UP;
@@ -102,15 +103,15 @@ func _update_velocity_walk(delta: float):
 func _update_velocity_air(delta: float):
 	# Jumping
 	if input_jump:
-		if on_floor && !_input_jump_held:
+		if on_floor && _input_jump_held <= jump_input_buffer:
 			jump(jump_speed);
 		
-		_input_jump_held = true;
+		_input_jump_held += delta;
 	else:
-		_input_jump_held = false;
+		_input_jump_held = 0.0;
 	
 	# Jump canceling
-	if !on_floor_raw && velocity.y < 0.0 && !_input_jump_held:
+	if !on_floor_raw && velocity.y < 0.0 && !input_jump:
 		velocity.y += jump_cancel_speed * delta;
 
 func _move_and_update_floor(delta: float):
