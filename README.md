@@ -11,6 +11,7 @@ This project's motto is "frame-perfect detail, down to the pixel".
 ## Prerequisites
 
 - Godot 4.4 stable (might change in the future)
+    - **Important**: Some features rely on [Godot for Sidescrollers](https://github.com/KeyboardDanni/godot-for-sidescrollers).
 - A copy of Aseprite (for graphics import)
 - Aseprite Wizard configured to point to the Aseprite binary in **Editor Settings -> Aseprite -> General** (may require Advanced Settings toggle).
 
