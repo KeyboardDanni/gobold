@@ -1,0 +1,94 @@
+[gd_scene load_steps=5 format=3 uid="uid://bvb3xondcbc5l"]
+
+[ext_resource type="Script" uid="uid://ee2flrliefe6" path="res://Core/DevCommand/DevCommandOverlay.gd" id="1_jxhm2"]
+[ext_resource type="Theme" uid="uid://o0hhjuab13vn" path="res://Core/Assets/CoreTheme.tres" id="1_lula8"]
+[ext_resource type="Texture2D" uid="uid://dqrp7s1sthhr5" path="res://Core/Assets/Sprites/Close.png" id="3_ivfcy"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_jxhm2"]
+font_size = 9
+outline_size = 2
+outline_color = Color(0, 0, 0, 0.752941)
+
+[node name="DevCommandOverlay" type="CanvasLayer"]
+process_mode = 3
+layer = 127
+script = ExtResource("1_jxhm2")
+
+[node name="ControlRoot" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_lula8")
+
+[node name="MarginContainer" type="MarginContainer" parent="ControlRoot"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ControlRoot/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ControlRoot/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Label" type="Label" parent="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Command >"
+label_settings = SubResource("LabelSettings_jxhm2")
+
+[node name="CommandEdit" type="LineEdit" parent="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+max_length = 4096
+keep_editing_on_text_submit = true
+
+[node name="CloseButton" type="Button" parent="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+icon = ExtResource("3_ivfcy")
+
+[node name="ResultLabel" type="RichTextLabel" parent="ControlRoot/MarginContainer/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+focus_neighbor_left = NodePath(".")
+focus_neighbor_top = NodePath(".")
+focus_neighbor_right = NodePath(".")
+focus_neighbor_bottom = NodePath(".")
+focus_next = NodePath("../HBoxContainer/CommandEdit")
+focus_previous = NodePath("../HBoxContainer/CommandEdit")
+focus_mode = 2
+theme_override_colors/selection_color = Color(0, 0.466667, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.752941)
+theme_override_constants/outline_size = 2
+theme_override_constants/line_separation = 2
+bbcode_enabled = true
+text = "Press 'Tab' for autocomplete."
+scroll_following = true
+context_menu_enabled = true
+selection_enabled = true
+
+[connection signal="editing_toggled" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_editing_toggled"]
+[connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_focus_exited"]
+[connection signal="text_changed" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_text_changed"]
+[connection signal="text_submitted" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_text_submitted"]
+[connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_focus_exited"]
+[connection signal="pressed" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
+[connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/ResultLabel" to="." method="_on_result_label_focus_exited"]

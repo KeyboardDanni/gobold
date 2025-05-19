@@ -7,8 +7,10 @@ signal setting_changed(keypath, new_value);
 const GAME_SETTINGS_FILENAME = "user://GameSettings.json";
 
 var _settings_tree: Dictionary[StringName, Variant];
-var _definition_dict: Dictionary[StringName, GameSettingDefinition];
-var _lookup_dict: Dictionary[StringName, GameSettingLookup];
+var _definition_dict: Dictionary[StringName, _GameSettingDefinition];
+var _lookup_dict: Dictionary[StringName, _GameSettingLookup];
+
+const SETTING_FLAG_ADVANCED: int = 1;
 
 func _enter_tree():
 	load_settings();
@@ -19,7 +21,7 @@ func _exit_tree():
 func is_setting_defined(keypath: StringName) -> bool:
 	return _definition_dict.has(keypath);
 
-func define_setting(keypath: StringName, default_value):
+func define_setting(keypath: StringName, default_value, flags: int = 0):
 	if keypath.length() <= 0:
 		push_error("Tried to define GameSetting with empty keypath");
 		return;
@@ -28,9 +30,12 @@ func define_setting(keypath: StringName, default_value):
 		push_error("Duplicate GameSetting definition at keypath \"" + keypath + "\"");
 		return;
 	
-	var definition := GameSettingDefinition.new();
+	var definition := _GameSettingDefinition.new();
 	
 	definition.default_value = default_value;
+	
+	if flags & SETTING_FLAG_ADVANCED:
+		definition.advanced = true;
 	
 	_definition_dict[keypath] = definition;
 	
@@ -44,7 +49,7 @@ func _add_setting_to_tree(keypath: StringName, value_if_missing):
 	# If it's in the lookup table it's already in the tree, so skip all this.
 	if !_lookup_dict.has(keypath):
 		var parts := keypath.split(".");
-		var lookup := GameSettingLookup.new();
+		var lookup := _GameSettingLookup.new();
 		lookup.dict_ref = _settings_tree;
 		lookup.dict_key = parts[parts.size() - 1];
 		
@@ -92,25 +97,81 @@ func get_setting(keypath: StringName):
 	
 	return lookup.dict_ref.get(lookup.dict_key);
 
-func set_setting(keypath: StringName, new_value):
+func has_setting(keypath: StringName) -> bool:
+	return _lookup_dict.get(keypath) != null;
+
+func set_setting(keypath: StringName, new_value) -> bool:
 	var definition = _definition_dict.get(keypath);
 	var lookup = _lookup_dict.get(keypath);
 	
 	if !lookup || !definition:
 		push_error("Unknown keypath \"" + keypath + "\"");
-		return;
+		return false;
 	
 	var new_type := typeof(new_value);
 	var default_type := typeof(definition.default_value);
 	
 	if new_type != default_type:
 		push_error("Type mismatch for keypath \"" + keypath + "\": expected " + str(default_type) + ", got " + str(new_type));
-		return;
+		return false;
 	
 	lookup.dict_ref[lookup.dict_key] = new_value;
 	
 	settings_changed.emit();
 	setting_changed.emit(keypath, new_value);
+	
+	return true;
+
+func set_setting_from_string(keypath: StringName, new_value: String) -> bool:
+	var definition = _definition_dict.get(keypath);
+	var lookup = _lookup_dict.get(keypath);
+	
+	if !lookup || !definition:
+		push_error("Unknown keypath \"" + keypath + "\"");
+		return false;
+	
+	var default_type := typeof(definition.default_value);
+	var converted = convert_string_to_type(new_value, default_type);
+	var new_type := typeof(converted);
+	
+	if new_type != default_type:
+		push_error("Type mismatch for keypath \"" + keypath + "\": expected " + str(default_type) + ", got " + str(new_type));
+		return false;
+	
+	lookup.dict_ref[lookup.dict_key] = converted;
+	
+	settings_changed.emit();
+	setting_changed.emit(keypath, converted);
+	
+	return true;
+
+func get_default(keypath: StringName):
+	var definition = _definition_dict.get(keypath);
+	
+	if !definition:
+		push_error("Unknown keypath \"" + keypath + "\"");
+		return;
+	
+	return definition.default_value;
+
+func is_advanced_setting(keypath: StringName) -> bool:
+	var definition = _definition_dict.get(keypath);
+	
+	if !definition:
+		push_error("Unknown keypath \"" + keypath + "\"");
+		return false;
+	
+	return definition.advanced;
+
+func reset_advanced_settings():
+	for keypath in _definition_dict:
+		var definition := _definition_dict[keypath];
+		
+		if definition.advanced:
+			set_setting(keypath, definition.default_value);
+
+func keys() -> PackedStringArray:
+	return _definition_dict.keys();
 
 func _handle_loaded_tree(plain_dict: Dictionary):
 	# Reset the existing settings store
@@ -133,6 +194,29 @@ func _recurse_input_dict(keypath: String, plain_dict: Dictionary):
 			_recurse_input_dict(keypath + key + ".", item);
 		else:
 			_add_setting_to_tree(StringName(keypath + key), item);
+
+func matches_default(keypath: StringName, new_value: String) -> bool:
+	var definition = _definition_dict.get(keypath);
+	
+	if !definition:
+		push_error("Unknown keypath \"" + keypath + "\"");
+		return false;
+	
+	var default_type := typeof(definition.default_value);
+	var new_converted = convert_string_to_type(new_value, default_type);
+	
+	return typeof(new_converted) == default_type && new_converted == definition.default_value;
+
+func convert_string_to_type(new_value: String, target_type: int) -> Variant:
+	match target_type:
+		TYPE_INT:
+			return int(new_value);
+		TYPE_FLOAT:
+			return float(new_value);
+		TYPE_STRING:
+			return new_value;
+	
+	return new_value;
 
 func load_settings():
 	if FileAccess.file_exists(GAME_SETTINGS_FILENAME):

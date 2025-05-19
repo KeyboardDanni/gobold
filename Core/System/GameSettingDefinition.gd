@@ -1,5 +1,6 @@
 extends RefCounted
 
-class_name GameSettingDefinition;
+class_name _GameSettingDefinition;
 
 var default_value: Variant;
+var advanced: bool = false;

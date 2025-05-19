@@ -42,10 +42,11 @@ func _ready():
 	GameSettings.define_setting(&"display.scale_mode", ScaleMode.StretchToFit);
 	GameSettings.define_setting(&"display.fps_limit", 0);
 	
-	GameSettings.define_setting(&"display.physics_lerp", PhysicsLerping.Automatic);
-	GameSettings.define_setting(&"display.low_latency", LowLatencyMode.Automatic);
+	GameSettings.define_setting(&"display.physics_lerp", PhysicsLerping.Automatic, GameSettings.SETTING_FLAG_ADVANCED);
+	GameSettings.define_setting(&"display.low_latency", LowLatencyMode.Automatic, GameSettings.SETTING_FLAG_ADVANCED);
 	
 	GameSettings.setting_changed.connect(self.setting_changed);
+	GameSettings.settings_loaded.connect(self.settings_loaded);
 	
 	apply_settings();
 
@@ -73,6 +74,9 @@ func toggle_fullscreen():
 func setting_changed(keypath: StringName, _new_value):
 	if keypath.begins_with("display."):
 		queue_apply_settings = true;
+
+func settings_loaded():
+	queue_apply_settings = true;
 
 func apply_settings():
 	_update_refresh_rate();
