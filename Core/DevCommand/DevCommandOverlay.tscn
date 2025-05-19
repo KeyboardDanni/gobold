@@ -88,7 +88,6 @@ selection_enabled = true
 [connection signal="editing_toggled" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_editing_toggled"]
 [connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_focus_exited"]
 [connection signal="text_changed" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_text_changed"]
-[connection signal="text_submitted" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_text_submitted"]
 [connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_focus_exited"]
 [connection signal="pressed" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
 [connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/ResultLabel" to="." method="_on_result_label_focus_exited"]

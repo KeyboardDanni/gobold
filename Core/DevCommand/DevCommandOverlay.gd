@@ -20,6 +20,7 @@ enum TextColor {
 }
 
 func _ready() -> void:
+	add_command("adjust_window", command_adjust_window);
 	add_command("set", command_set, autocomplete_set);
 	add_command("reset", command_reset, autocomplete_reset);
 	add_command("reset_advanced", command_reset_advanced);
@@ -37,9 +38,12 @@ func _physics_process(_delta: float) -> void:
 		return;
 	
 	if _queued_command is String:
-		run_command(_queued_command);
-		_last_command = _queued_command;
-		_last_run_command = _queued_command;
+		var result := run_command(_queued_command);
+		
+		if result:
+			_last_command = _queued_command;
+			_last_run_command = _queued_command;
+		
 		_queued_command = null;
 
 func _input(event: InputEvent) -> void:
@@ -56,6 +60,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled();
 	
 	if visible:
+		if event.is_action("ui_text_submit") && !Input.is_key_pressed(KEY_ALT):
+			_queued_command = %CommandEdit.text;
+			%CommandEdit.clear();
 		if event.is_action("ui_cancel"):
 			visible = false;
 			
@@ -102,10 +109,6 @@ func update_box_width():
 	var padded := text_size.x + command_edit_size_text_padding;
 	
 	%CommandEdit.custom_minimum_size.x = clampf(padded, command_edit_size_min, command_edit_size_max);
-
-func _on_command_edit_text_submitted(new_text: String) -> void:
-	_queued_command = new_text;
-	%CommandEdit.clear();
 
 func _on_close_button_pressed() -> void:
 	visible = false;
@@ -188,12 +191,12 @@ func _find_common_prefix(typed: String, possibilities: PackedStringArray) -> Str
 	
 	return prefix;
 
-func run_command(command: String):
+func run_command(command: String) -> bool:
 	clear_output();
 	
 	var stripped := command.strip_edges();
 	if stripped.is_empty():
-		return;
+		return false;
 	
 	output_text("> " + _queued_command, TextColor.YELLOW);
 	
@@ -206,6 +209,14 @@ func run_command(command: String):
 		function.call(parts);
 	else:
 		output_text("Unknown command \"" + command_name + "\"", TextColor.RED);
+	
+	return true;
+
+func command_adjust_window(_parts: PackedStringArray):
+	var success := DisplayManager.adjust_window(true);
+	
+	if !success:
+		output_text("Window cannot be adjusted in this state.", TextColor.RED);
 
 func command_set(parts: PackedStringArray):
 	if parts.size() < 2:

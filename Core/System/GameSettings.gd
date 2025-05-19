@@ -5,6 +5,24 @@ signal settings_changed();
 signal setting_changed(keypath, new_value);
 
 const GAME_SETTINGS_FILENAME = "user://GameSettings.json";
+const TRUTHY_BOOL_STRINGS: PackedStringArray = [
+	"1",
+	"true",
+	"t",
+	"on",
+	"yes",
+	"y",
+	"enabled"
+];
+const FALSY_BOOL_STRINGS: PackedStringArray = [
+	"0",
+	"false",
+	"f",
+	"off",
+	"no",
+	"n",
+	"disabled"
+];
 
 var _settings_tree: Dictionary[StringName, Variant];
 var _definition_dict: Dictionary[StringName, _GameSettingDefinition];
@@ -79,6 +97,17 @@ func _sanitize_setting(keypath: StringName):
 	var existing = lookup.dict_ref[lookup.dict_key];
 	
 	match typeof(definition.default_value):
+		TYPE_BOOL:
+			if existing is bool:
+				pass;
+			elif existing is int:
+				existing = true if existing > 0 else false;
+			elif existing is float:
+				existing = true if existing >= 0.5 else false;
+			elif existing is String:
+				existing = true if TRUTHY_BOOL_STRINGS.has(existing.to_lower()) else false;
+			else:
+				existing = false;
 		TYPE_INT:
 			existing = int(existing);
 		TYPE_FLOAT:
@@ -209,6 +238,13 @@ func matches_default(keypath: StringName, new_value: String) -> bool:
 
 func convert_string_to_type(new_value: String, target_type: int) -> Variant:
 	match target_type:
+		TYPE_BOOL:
+			var lowercase := new_value.to_lower();
+			
+			if TRUTHY_BOOL_STRINGS.has(lowercase):
+				return true;
+			elif FALSY_BOOL_STRINGS.has(lowercase):
+				return false;
 		TYPE_INT:
 			return int(new_value);
 		TYPE_FLOAT:
