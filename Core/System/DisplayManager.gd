@@ -167,7 +167,8 @@ func _update_auto_low_latency():
 func _save_window_state():
 	var display_mode := DisplayServer.window_get_mode();
 	
-	if display_mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+	if display_mode != DisplayServer.WINDOW_MODE_WINDOWED \
+			&& display_mode != DisplayServer.WINDOW_MODE_MAXIMIZED:
 		return;
 	
 	var is_maximized := display_mode == DisplayServer.WINDOW_MODE_MAXIMIZED;
