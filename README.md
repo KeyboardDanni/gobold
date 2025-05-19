@@ -8,6 +8,16 @@ This project's motto is "frame-perfect detail, down to the pixel".
 
 ![Screenshot of Gobold](https://raw.githubusercontent.com/KeyboardDanni/gobold/main/screenshot.png)
 
+## Features
+
+- Character controller with specialized slope handling.
+- Clean pixel-perfect camera movement.
+- Game settings framework.
+- Display manager with automatic pixel scaling options and Alt + Enter shortcut for fullscreen.
+- Automatic physics interpolation toggle for the smoothest physics motion at any refresh rate.
+- Low latency mode enabled for refresh rates below 120hz.
+- In-game developer command interface (Tilde key) with support for autocomplete and custom commands.
+
 ## Prerequisites
 
 - Godot 4.4 stable (might change in the future)
