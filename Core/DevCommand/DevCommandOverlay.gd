@@ -1,5 +1,9 @@
 extends CanvasLayer
 
+const WINDOW_MODE_NAME: PackedStringArray = [
+	"Windowed", "Minimized", "Maximized", "Fullscreen (Redirected)", "Fullscreen"
+];
+
 var command_edit_size_min: float = 64.0;
 var command_edit_size_max: float = 256.0;
 var command_edit_size_text_padding: float = 16.0;
@@ -323,10 +327,17 @@ func command_help(_parts: PackedStringArray):
 func command_system_info(_parts: PackedStringArray):
 	var info_text := "";
 	
+	var os_name := OS.get_name();
+	var os_distro := OS.get_distribution_name();
+	var os_version := OS.get_version_alias();
+	
+	info_text += "OS: " + os_distro + " / " + os_name + " " + os_version;
+	
 	var cpu_name := OS.get_processor_name();
 	var cpu_threads := OS.get_processor_count();
 	
-	info_text += "CPU: " + cpu_name + "\nThreads: " + str(cpu_threads);
+	info_text += "\n\nCPU: " + cpu_name + " / " + str(cpu_threads) + " " + \
+		("threads" if cpu_threads > 1 else "thread");
 	
 	var device_name := RenderingServer.get_video_adapter_name();
 	var backend := "OpenGL";
@@ -341,29 +352,41 @@ func command_system_info(_parts: PackedStringArray):
 	info_text += "\n\nRenderer: " + device_name + "\n" + backend + " " + api_version;
 	
 	var window_size := DisplayServer.window_get_size();
-	var screen_size := DisplayServer.screen_get_size();
-	var screen_scale := DisplayServer.screen_get_scale();
-	var refresh_rate := roundf(DisplayServer.screen_get_refresh_rate() * 100.0) / 100.0;
+	var window_mode := WINDOW_MODE_NAME[DisplayServer.window_get_mode()];
+	var screen_count := DisplayServer.get_screen_count();
+	var screen_primary := DisplayServer.get_primary_screen();
+	var screen_current := DisplayServer.window_get_current_screen();
 	
-	info_text += "\n\nWindow: " + str(window_size.x) + "x" + str(window_size.y) + \
-		"\nDisplay: " + str(screen_size.x) + "x" + str(screen_size.y) + " " + str(refresh_rate) + " hz" + \
-		"\nDPI scale: " + str(screen_scale) + "x";
+	info_text += "\n\nWindow: " + str(window_size.x) + "x" + str(window_size.y) + " / " + window_mode + \
+		"\nDisplay: index " + str(screen_current);
+	
+	for screen_id in range(screen_count):
+		var screen_size := DisplayServer.screen_get_size(screen_id);
+		var screen_scale := DisplayServer.screen_get_scale(screen_id);
+		var refresh_rate := roundf(DisplayServer.screen_get_refresh_rate(screen_id) * 100.0) / 100.0;
+		
+		info_text += "\n    Display " + str(screen_id) + ": " + str(screen_size.x) + "x" + str(screen_size.y) + \
+			" / " + str(refresh_rate) + " hz / " + str(screen_scale) + "x DPI scale";
+		
+		if screen_id == screen_primary:
+			info_text += " / primary";
 	
 	var audio_device_name := AudioServer.output_device;
 	var driver_name := AudioServer.get_driver_name();
 	var mix_rate := AudioServer.get_mix_rate();
 	
-	info_text += "\n\nAudio device: " + audio_device_name + " - " + driver_name + "\nMix rate: " + str(mix_rate) + " hz";
+	info_text += "\n\nAudio device: " + audio_device_name + " / " + driver_name + "\nMix rate: " + str(mix_rate) + " hz";
 	
 	var joypad_ids := Input.get_connected_joypads();
 	
 	info_text += "\n\nGamepads: " + str(joypad_ids.size()) + " connected";
 	
 	for id in joypad_ids:
-		info_text += "\nPad " + str(id) + ": " + Input.get_joy_name(id);
+		info_text += "\n    Pad " + str(id) + ": " + Input.get_joy_name(id);
 	
 	DisplayServer.clipboard_set(info_text);
-	output_text(info_text + "\n\n(Copied to clipboard)");
+	output_text("(Copied to clipboard)\n");
+	output_text(info_text);
 
 func command_quit(_parts: PackedStringArray):
 	get_tree().quit();

@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=15 format=3 uid="uid://o0hhjuab13vn"]
 
-[ext_resource type="FontFile" uid="uid://cx8ikj8ljsxbp" path="res://Core/Assets/Fonts/PixeloidSans.ttf" id="1_1d034"]
+[ext_resource type="FontVariation" uid="uid://cdnl1t8r2krf7" path="res://Core/Assets/Fonts/PixeloidSans.tres" id="1_1d034"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1d034"]
 content_margin_left = 4.0

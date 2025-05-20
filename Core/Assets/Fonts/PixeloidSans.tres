@@ -1,0 +1,7 @@
+[gd_resource type="FontVariation" load_steps=2 format=3 uid="uid://cdnl1t8r2krf7"]
+
+[ext_resource type="FontFile" uid="uid://cx8ikj8ljsxbp" path="res://Core/Assets/Fonts/PixeloidSans.ttf" id="1_6eqej"]
+
+[resource]
+base_font = ExtResource("1_6eqej")
+spacing_space = 1
