@@ -6,6 +6,8 @@ var command_edit_size_text_padding: float = 16.0;
 
 var _commands: Dictionary[String, Callable];
 var _autocompleters: Dictionary[String, Callable];
+var _descriptions: Dictionary[String, String];
+var _groups: Dictionary[String, Array];
 var _queued_command = null;
 var _last_run_command: String;
 var _last_command: String;
@@ -16,18 +18,22 @@ enum TextColor {
 	RED,
 	YELLOW,
 	GREEN,
-	BLUE
+	BLUE,
+	PURPLE,
 }
 
 func _ready() -> void:
-	add_command("adjust_window", command_adjust_window);
-	add_command("set", command_set, autocomplete_set);
-	add_command("reset", command_reset, autocomplete_reset);
-	add_command("reset_advanced", command_reset_advanced);
-	add_command("load_settings", command_load_settings);
-	add_command("save_settings", command_save_settings);
-	add_command("system_info", command_system_info);
-	add_command("quit", command_quit);
+	add_command("set", "settings", "View or modify a game setting", command_set, autocomplete_set);
+	add_command("reset", "settings", "Revert a game setting to default", command_reset, autocomplete_reset);
+	add_command("reset_advanced", "settings", "Revert all advanced game settings to defaults", command_reset_advanced);
+	add_command("load_settings", "settings", "Load game settings from disk", command_load_settings);
+	add_command("save_settings", "settings", "Save game settings to disk", command_save_settings);
+	
+	add_command("adjust_window", "display", "Re-center and scale window based on display.window_scale", command_adjust_window);
+	
+	add_command("help", "core", "Show help", command_help);
+	add_command("system_info", "core", "Print basic hardware and system information", command_system_info);
+	add_command("quit", "core", "Quit the game", command_quit);
 	
 	_on_command_edit_text_changed("");
 	
@@ -131,13 +137,19 @@ func check_lost_focus():
 			!%ResultLabel.has_focus():
 		visible = false;
 
-func add_command(command_name: String, function: Callable, autocompleter: Callable = Callable()):
+func add_command(command_name: String, group: String, description: String, function: Callable, autocompleter: Callable = Callable()):
 	if _commands.has(command_name):
 		push_error("Command \"" + command_name + "\" already added.");
 		return;
 	
 	_commands[command_name] = function;
 	_autocompleters[command_name] = autocompleter;
+	_descriptions[command_name] = description;
+	
+	if !_groups.has(group):
+		_groups[group] = [];
+	
+	_groups[group].append(command_name);
 
 func autocomplete():
 	var possibilities: PackedStringArray;
@@ -292,6 +304,22 @@ func command_load_settings(_parts: PackedStringArray):
 func command_save_settings(_parts: PackedStringArray):
 	GameSettings.save_settings();
 
+func command_help(_parts: PackedStringArray):
+	output_text("Dev command keyboard help:\n", TextColor.PURPLE);
+	output_text("Tilde (`):\topen/close dev command overlay");
+	output_text("Tab:\tautocomplete");
+	output_text("Up:\trecall last command");
+	output_text("Down:\tclear command");
+	output_text("PgUp/PgDown:\tscroll output");
+	
+	output_text("\nCommand list by group:", TextColor.PURPLE);
+	
+	for group in _groups:
+		output_text("\n" + group + " group:", TextColor.BLUE);
+		
+		for command_name in _groups[group]:
+			output_text("    " + command_name + "\t  " + _descriptions[command_name]);
+
 func command_system_info(_parts: PackedStringArray):
 	var info_text := "";
 	
@@ -370,13 +398,15 @@ func output_text(output: String, color: TextColor = TextColor.WHITE, strip_bbcod
 		TextColor.GRAY:
 			color_code = "#cacaca";
 		TextColor.RED:
-			color_code = "#ffabb9";
+			color_code = "#ffafbc";
 		TextColor.YELLOW:
-			color_code = "#f7e785";
+			color_code = "#f2e7a0";
 		TextColor.GREEN:
-			color_code = "#98df9a";
+			color_code = "#a1dca2";
 		TextColor.BLUE:
-			color_code = "#91c7ff";
+			color_code = "#9eceff";
+		TextColor.PURPLE:
+			color_code = "#d4bcff";
 
 	%ResultLabel.text += "[color=" + color_code + "]" + output + "[/color]\n";
 

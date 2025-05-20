@@ -81,8 +81,8 @@ theme_override_constants/outline_size = 2
 theme_override_constants/line_separation = 2
 bbcode_enabled = true
 text = "Press 'Tab' for autocomplete."
-scroll_following = true
 context_menu_enabled = true
+tab_stops = PackedFloat32Array(96, 192, 288, 384, 480, 576)
 selection_enabled = true
 
 [connection signal="editing_toggled" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_editing_toggled"]
