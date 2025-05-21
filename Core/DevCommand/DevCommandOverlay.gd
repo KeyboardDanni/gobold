@@ -36,7 +36,7 @@ func _ready() -> void:
 	add_command("save_settings", "settings", "Save game settings to disk", command_save_settings);
 	add_command("open_data_dir", "settings", "Open save data directory in file manager", command_open_data_dir);
 	
-	add_command("adjust_window", "display", "Re-center and scale window based on display.window_scale", command_adjust_window);
+	add_command("window_adjust", "display", "Re-center and scale window based on display.window_scale", command_window_adjust);
 	
 	add_command("help", "core", "Show help", command_help);
 	add_command("system_info", "core", "Print basic hardware and system information", command_system_info);
@@ -247,7 +247,7 @@ func run_command(command: String) -> bool:
 	
 	return true;
 
-func command_adjust_window(_parts: PackedStringArray):
+func command_window_adjust(_parts: PackedStringArray):
 	var success := DisplayManager.adjust_window(true);
 	
 	if !success:
