@@ -34,12 +34,13 @@ func _ready() -> void:
 	add_command("reset_advanced", "settings", "Revert all advanced game settings to defaults", command_reset_advanced);
 	add_command("load_settings", "settings", "Load game settings from disk", command_load_settings);
 	add_command("save_settings", "settings", "Save game settings to disk", command_save_settings);
-	add_command("open_data_dir", "settings", "Open save data directory in file manager", command_open_data_dir);
 	
 	add_command("window_adjust", "display", "Re-center and scale window based on display.window_scale", command_window_adjust);
 	
 	add_command("help", "core", "Show help", command_help);
 	add_command("system_info", "core", "Print basic hardware and system information", command_system_info);
+	add_command("open_app_dir", "core", "Open app directory in file manager", command_open_app_dir);
+	add_command("open_data_dir", "core", "Open save data directory in file manager", command_open_data_dir);
 	add_command("quit", "core", "Quit the game", command_quit);
 	
 	GameSettings.define_setting(&"dev.expert", false, GameSettings.SETTING_FLAG_ADVANCED);
@@ -333,6 +334,11 @@ func command_open_data_dir(_parts: PackedStringArray):
 	var data_dir := OS.get_user_data_dir();
 	
 	OS.shell_open(data_dir);
+
+func command_open_app_dir(_parts: PackedStringArray):
+	var app_dir := OS.get_executable_path().get_base_dir();
+	
+	OS.shell_open(app_dir);
 
 func command_help(_parts: PackedStringArray):
 	output_text("Dev command keyboard help:\n", TextColor.PURPLE);
