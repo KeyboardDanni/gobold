@@ -1,5 +1,6 @@
 extends CanvasLayer
 
+const DEV_COMMAND_KEY_HOLD_TIME: float = 0.125;
 const WINDOW_MODE_NAME: PackedStringArray = [
 	"Windowed", "Minimized", "Maximized", "Fullscreen (Redirected)", "Fullscreen"
 ];
@@ -8,6 +9,7 @@ var command_edit_size_min: float = 64.0;
 var command_edit_size_max: float = 256.0;
 var command_edit_size_text_padding: float = 16.0;
 
+var _dev_command_key_held: float = 0.0;
 var _commands: Dictionary[String, Callable];
 var _autocompleters: Dictionary[String, Callable];
 var _descriptions: Dictionary[String, String];
@@ -32,6 +34,7 @@ func _ready() -> void:
 	add_command("reset_advanced", "settings", "Revert all advanced game settings to defaults", command_reset_advanced);
 	add_command("load_settings", "settings", "Load game settings from disk", command_load_settings);
 	add_command("save_settings", "settings", "Save game settings to disk", command_save_settings);
+	add_command("open_data_dir", "settings", "Open save data directory in file manager", command_open_data_dir);
 	
 	add_command("adjust_window", "display", "Re-center and scale window based on display.window_scale", command_adjust_window);
 	
@@ -39,11 +42,29 @@ func _ready() -> void:
 	add_command("system_info", "core", "Print basic hardware and system information", command_system_info);
 	add_command("quit", "core", "Quit the game", command_quit);
 	
+	GameSettings.define_setting(&"dev.expert", false, GameSettings.SETTING_FLAG_ADVANCED);
+	
 	_on_command_edit_text_changed("");
 	
 	visible = false;
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if Input.is_action_pressed("system_devcommand"):
+		if _dev_command_key_held >= 0.0:
+			_dev_command_key_held += delta;
+			
+			var hold_time_target := 0.0;
+			
+			if !visible && !GameSettings.get_setting(&"dev.expert"):
+				hold_time_target = DEV_COMMAND_KEY_HOLD_TIME;
+			
+			if _dev_command_key_held >= hold_time_target:
+				_dev_command_key_held = -1.0;
+				
+				visible = !visible;
+	else:
+		_dev_command_key_held = 0.0;
+	
 	if get_tree().paused:
 		return;
 	
@@ -61,12 +82,6 @@ func _input(event: InputEvent) -> void:
 		return;
 	
 	if event.is_action("system_devcommand"):
-		if !event.is_echo():
-			visible = !visible;
-			
-			if visible:
-				%CommandEdit.grab_focus.call_deferred();
-			
 		get_viewport().set_input_as_handled();
 	
 	if visible:
@@ -107,6 +122,10 @@ func _input(event: InputEvent) -> void:
 				%CommandEdit.grab_focus.call_deferred();
 				
 				get_viewport().set_input_as_handled();
+
+func _on_visibility_changed() -> void:
+	if visible:
+		%CommandEdit.grab_focus.call_deferred();
 
 func _on_command_edit_text_changed(_new_text: String) -> void:
 	update_box_width.call_deferred();
@@ -235,6 +254,8 @@ func command_adjust_window(_parts: PackedStringArray):
 		output_text("Window cannot be adjusted in this state.", TextColor.RED);
 
 func command_set(parts: PackedStringArray):
+	var expert := bool(GameSettings.get_setting(&"dev.expert"));
+	
 	if parts.size() < 2:
 		output_text("set: Missing settings keypath.", TextColor.RED);
 		return;
@@ -259,9 +280,9 @@ func command_set(parts: PackedStringArray):
 		var new_value := " ".join(other_parts);
 		var new_is_default := GameSettings.matches_default(setting_name, new_value);
 		
-		if advanced && _queued_command != _last_run_command && !new_is_default:
+		if advanced && !expert && _queued_command != _last_run_command && !new_is_default:
 			output_text("\"" + setting_name + "\" is an advanced setting." +
-				"\nIf you know what you're doing, run this command again." +
+				"\nIf you know what you're doing, run this command again (Up, Enter)." +
 				"\nOtherwise you should leave this setting alone.", TextColor.RED);
 			return;
 		
@@ -307,6 +328,11 @@ func command_load_settings(_parts: PackedStringArray):
 
 func command_save_settings(_parts: PackedStringArray):
 	GameSettings.save_settings();
+
+func command_open_data_dir(_parts: PackedStringArray):
+	var data_dir := OS.get_user_data_dir();
+	
+	OS.shell_open(data_dir);
 
 func command_help(_parts: PackedStringArray):
 	output_text("Dev command keyboard help:\n", TextColor.PURPLE);

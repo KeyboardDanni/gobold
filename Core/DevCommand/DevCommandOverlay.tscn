@@ -85,6 +85,7 @@ context_menu_enabled = true
 tab_stops = PackedFloat32Array(96, 192, 288, 384, 480, 576)
 selection_enabled = true
 
+[connection signal="visibility_changed" from="." to="." method="_on_visibility_changed"]
 [connection signal="editing_toggled" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_editing_toggled"]
 [connection signal="focus_exited" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_focus_exited"]
 [connection signal="text_changed" from="ControlRoot/MarginContainer/VBoxContainer/HBoxContainer/CommandEdit" to="." method="_on_command_edit_text_changed"]
